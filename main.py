@@ -8,7 +8,7 @@ from pygame.locals import (
 from Colors import Colors
 from Enemy import Enemy
 from Player import Player
-from Settings import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BACKGROUND_COLOR
+from Settings import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BACKGROUND_COLOR, GAME_MODE
 from Supporting_Functions import round_down
 
 pygame.init()
@@ -19,7 +19,9 @@ screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 
 # CUSTOM EVENT FOR ADDING ENEMIES
 ADD_ENEMY = pygame.USEREVENT + 1
-pygame.time.set_timer(ADD_ENEMY, 150)
+if GAME_MODE == 'easy': pygame.time.set_timer(ADD_ENEMY, 150)
+if GAME_MODE == 'medium': pygame.time.set_timer(ADD_ENEMY, 110)
+if GAME_MODE == 'hard': pygame.time.set_timer(ADD_ENEMY, 75)
 
 # CUSTOM EVENT FOR UPDATING TIMER
 UPDATE_TIMER = pygame.USEREVENT + 2
@@ -79,6 +81,6 @@ while running:
     # Blit the timer
     screen.blit(text, textRect)
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(120)
 
 pygame.quit()

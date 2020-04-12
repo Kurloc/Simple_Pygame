@@ -9,10 +9,10 @@ from Settings import SCREEN_WIDTH, SCREEN_HEIGHT
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        self.surf = pygame.Surface((75, 25))
+        self.surf = pygame.Surface((SCREEN_WIDTH/30, SCREEN_HEIGHT/40))
         self.surf.fill((255, 255, 255))
         self.rect = self.surf.get_rect()
-        self.speed = 3
+        self.speed = SCREEN_WIDTH / 666
 
     def update(self, pressed_keys):
         if pressed_keys[K_UP]:

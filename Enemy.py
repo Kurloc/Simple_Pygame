@@ -6,7 +6,7 @@ from Supporting_Functions import determine_enemy_speed_range
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, *groups):
         super().__init__(*groups)
-        self.surf = pygame.Surface((20, 10))
+        self.surf = pygame.Surface((SCREEN_WIDTH/90, SCREEN_HEIGHT/100))
         self.surf.fill((255, 0, 0))
         self.rect = self.surf.get_rect(
             center=(
