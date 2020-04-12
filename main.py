@@ -1,97 +1,84 @@
 import random
-
+import time
 import pygame
-
 from pygame.locals import (
     K_UP, K_DOWN, K_LEFT, K_RIGHT, KEYDOWN, QUIT,
     K_ESCAPE)
 
+from Colors import Colors
+from Enemy import Enemy
+from Player import Player
+from Settings import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BACKGROUND_COLOR
+from Supporting_Functions import round_down
+
 pygame.init()
-SCREEN_WIDTH = 3000
-SCREEN_HEIGHT = 1500
+running = True
+clock = pygame.time.Clock()
+
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 
-# CUSTOM EVENT FOR ADDING ENERMIES
-ADDENEMY = pygame.USEREVENT + 1
-pygame.time.set_timer(ADDENEMY, 150)
+# CUSTOM EVENT FOR ADDING ENEMIES
+ADD_ENEMY = pygame.USEREVENT + 1
+pygame.time.set_timer(ADD_ENEMY, 150)
 
-running = True
+# CUSTOM EVENT FOR UPDATING TIMER
+UPDATE_TIMER = pygame.USEREVENT + 2
+pygame.time.set_timer(UPDATE_TIMER, 100)
 
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        super(Player, self).__init__()
-        self.surf = pygame.Surface((75, 25))
-        self.surf.fill((255, 255, 255))
-        self.rect = self.surf.get_rect()
-
-    def update(self, pressed_keys):
-        print(pressed_keys)
-        if pressed_keys[K_UP]:
-            self.rect.move_ip(0, -1)
-        if pressed_keys[K_DOWN]:
-            self.rect.move_ip(0, 1)
-        if pressed_keys[K_LEFT]:
-            self.rect.move_ip(-1, 0)
-        if pressed_keys[K_RIGHT]:
-            self.rect.move_ip(1, 0)
-
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
-        if self.rect.top <= 0:
-            self.rect.top = 0
-        if self.rect.bottom >= SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-
-
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self, *groups):
-        super().__init__(*groups)
-        self.surf = pygame.Surface((20, 10))
-        self.surf.fill((255, 0, 0))
-        self.rect = self.surf.get_rect(
-            center=(
-                random.randint(SCREEN_WIDTH + 20, SCREEN_WIDTH + 100),
-                random.randint(0, SCREEN_HEIGHT),
-            )
-        )
-        self.speed = random.randint(1, 2)
-
-    def update(self):
-        self.rect.move_ip(-self.speed, 0)
-        if self.rect.right < 0:
-            self.kill()
-
-
+# Initiate player and enemies
 player = Player()
 enemies = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
+# Timer for game
+start_time = time.time()
+pygame.display.set_caption('Show Text')
+font = pygame.font.Font('freesansbold.ttf', 32)
+current_time_string = '0'
+
 while running:
+    # Check events for any inputs and stuff
     for event in pygame.event.get():
+        # Quit Event
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 running = False
-        elif event.type == ADDENEMY:
+        # Add Enemy Event. Happens every .15 seconds
+        elif event.type == ADD_ENEMY:
             new_enemy = Enemy()
             enemies.add(new_enemy)
             all_sprites.add(new_enemy)
+        # Update timer event. Happens every 100ms
+        elif event.type == UPDATE_TIMER:
+            current_time = time.time() - start_time
+            # Round to 3 digits
+            current_time_string = str(round_down(current_time, 1))
+            # Render the timer in the top left corner
 
+    # Text for timer
+    text = font.render(current_time_string, True, Colors.green, SCREEN_BACKGROUND_COLOR)
+    textRect = text.get_rect()
+    textRect.center = (SCREEN_WIDTH - (SCREEN_WIDTH * .95), SCREEN_HEIGHT - (SCREEN_HEIGHT * .95))
+
+    # Capture player movement and move them
     pressed_keys = pygame.key.get_pressed()
     player.update(pressed_keys)
+
+    # Move the enemies across the screen. May update with UI eventually
     enemies.update()
 
-    screen.fill((0, 0, 0))
+    screen.fill(SCREEN_BACKGROUND_COLOR)
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
 
     if pygame.sprite.spritecollideany(player, enemies):
         player.kill()
-        running = False;
+        running = False
 
+    # Blit the timer
+    screen.blit(text, textRect)
     pygame.display.flip()
+    clock.tick(60)
 
 pygame.quit()
